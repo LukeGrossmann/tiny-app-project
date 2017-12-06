@@ -4,10 +4,8 @@
   <title>TinyApp</title>
 </head>
 <div> <%- include partials/_header.ejs %> </div>
-  <p> this is the included _header.ejs file </p>
 <body>
-  <% for(var i in urls) { %>
-  <%= i + ': ' + urls[i] %>
-<% } %>
+<%= longUrl %>
+<%= shortUrl %>
 </body>
 </html>
