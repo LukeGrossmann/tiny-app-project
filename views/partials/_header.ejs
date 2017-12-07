@@ -1,2 +1,18 @@
 <p> This is the included _header </p>
+<% if(username) { %>
+
+<form method="POST" action="/logout"/>
+
+  <input type="submit" value="logout"/>
+
+</form>
+
+<% } else { %>
+<form method="POST" action="/login"/>
+
+  <input type="text" name="username" value=""/>
+
+  <input type="submit" value="login">
+</form>
+<%}%>
 
