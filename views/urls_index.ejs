@@ -5,8 +5,15 @@
 </head>
 <div> <%- include partials/_header.ejs %> </div>
 <body>
+  <ul>
   <% for(var i in urls) { %>
-  <%= i + ': ' + urls[i] %>
+  <li>
+    <%= i + ': ' + urls[i] %>
+    <form method="POST" action="/urls/<%=i%>/delete">
+      <button> DELETE </button>
+    </form>
+  </li>
 <% } %>
+</ul>
 </body>
 </html>
