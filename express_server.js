@@ -20,6 +20,16 @@ app.get("/u/:shortId", (req, res) => {
   }
   res.redirect(longURL);
 });
+app.post("/urls/:id/update", (req, res) => {
+  var shortId = req.params.id;
+
+  console.log(shortId);
+  console.log(req.body.longUrl);
+  //update db
+  urlDatabase[shortId] = req.body.longUrl;
+
+  res.redirect(`/urls/${shortId}`);
+});
 app.post("/urls/:id/delete", (req, res) => {
   var shortURL = req.params.id;
   // var longURL = urlDatabase[shortURL];
