@@ -12,13 +12,20 @@ var urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
-app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
+app.get("/u/:shortId", (req, res) => {
+  let longURL = urlDatabase[req.params.shortId];
   if (longURL === undefined) {
     res.sendStatus(404);
     return;
   }
   res.redirect(longURL);
+});
+app.post("/urls/:id/delete", (req, res) => {
+  var shortURL = req.params.id;
+  // var longURL = urlDatabase[shortURL];
+  // var combined = `${shortURL + longURL}`;
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
 });
 
 app.get("/urls", (req, res) => {
