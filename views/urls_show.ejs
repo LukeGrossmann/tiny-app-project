@@ -5,7 +5,11 @@
 </head>
 <div> <%- include partials/_header.ejs %> </div>
 <body>
-<%= longUrl %>
 <%= shortUrl %>
+<a href=
+<form method="POST" action="/urls/<%= shortUrl%>/update">
+  <input name="longUrl" type="text" value= "<%=longUrl%>">
+  <button type="submit"> EDIT </button>
+</form>
 </body>
 </html>
