@@ -15,6 +15,35 @@ var urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  titan: {
+    id: "titan",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  hunter: {
+    id: "hunter",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  },
+  warlock: {
+    id: "warlock",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  },
+  dreg: {
+    id: "dreg",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
+
+function loopingUsers(email) {
+  for (var prop in users) {
+    return users[prop].email === email;
+  }
+}
+
 app.get("/u/:shortId", (req, res) => {
   let longURL = urlDatabase[req.params.shortId];
   if (longURL === undefined) {
@@ -29,6 +58,7 @@ app.post("/login", (req, res) => {
   res.cookie("username", username);
   res.redirect("/urls");
 });
+
 app.post("/logout", (req, res) => {
   // const { username } = req.body;
   res.clearCookie("username");
@@ -45,12 +75,44 @@ app.post("/urls/:id/update", (req, res) => {
 
   res.redirect(`/urls/${shortId}`);
 });
+
 app.post("/urls/:id/delete", (req, res) => {
   var shortURL = req.params.id;
   // var longURL = urlDatabase[shortURL];
   // var combined = `${shortURL + longURL}`;
   delete urlDatabase[shortURL];
   res.redirect("/urls");
+});
+
+app.post("/register", (req, res) => {
+  var newId = shortId.generate();
+  var email = req.body["email"];
+  var password = req.body["password"];
+  users[newId] = {
+    id: newId,
+    email: email,
+    password: password
+  };
+  console.log(users);
+  res.cookie("newID", newId);
+  if (email === "" || password === "") {
+    res.sendStatus(404);
+    return;
+  } else if (loopingUsers(email)) {
+    res.sendStatus(404);
+    return;
+  }
+
+  res.redirect("/urls");
+});
+
+app.get("/register", (req, res) => {
+  // let templateVars = {
+  //   //   email: req.body["email"],
+  //   //   password: req.body["password"]
+  // };
+
+  res.render("register");
 });
 
 app.get("/urls", (req, res) => {
@@ -90,8 +152,14 @@ app.post("/urls", (req, res) => {
   // debug statement to see POST parameters
   urlDatabase[newId] = longUrl;
   console.log(urlDatabase);
-  res.redirect(`/urls/${newId}`); // Respond with 'Ok' (we will replace this)
+  res.redirect(`/urls/${newId}`);
 });
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+});
+
+// this was the function I was going to use instead of downloading shortID module!!!!!
 
 // function generateRandomString(string) {
 //   let possible = "1234567890";
@@ -103,7 +171,3 @@ app.post("/urls", (req, res) => {
 // }
 
 // generateRandomString();
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
