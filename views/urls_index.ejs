@@ -3,17 +3,17 @@
 <head>
   <title>TinyApp</title>
 </head>
-<div> <%- include partials/_header.ejs %> </div>
 <body>
+  <div> <%- include partials/_header.ejs %> </div>
   <ul>
-  <% for(var i in urls) { %>
-  <li>
-    <%= i + ': ' + urls[i] %>
-    <form method="POST" action="/urls/<%=i%>/delete">
-      <button> DELETE </button>
-    </form>
-  </li>
-<% } %>
-</ul>
+    <% for (var i in urls) { %>
+      <li>
+        <%= i + ': ' + urls[i] %>
+        <form method="POST" action="/urls/<%=i%>/delete">
+          <button> DELETE </button>
+        </form>
+      </li>
+    <% } %>
+  </ul>
 </body>
 </html>
