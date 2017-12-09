@@ -4,6 +4,9 @@ const PORT = process.env.PORT || 8080; // default port 8080
 const bodyParser = require("body-parser");
 const shortId = require("shortid");
 const cookieParser = require("cookie-parser");
+const morgan = require("morgan");
+
+app.use(morgan("tiny"));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -11,20 +14,26 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 
 var urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b2xVn2: {
+    longUrl: "http://www.lighthouselabs.ca",
+    userId: "hunter"
+  },
+  "9sm5xK": {
+    longUrl: "http://www.google.com",
+    userId: "titan"
+  }
 };
 
 var users = {
   titan: {
     id: "titan",
     email: "a@a",
-    password: "a  "
+    password: "a"
   },
   hunter: {
     id: "hunter",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
+    email: "b@b",
+    password: "b"
   },
   warlock: {
     id: "warlock",
@@ -43,15 +52,6 @@ function is_duplicate_email(email) {
     return users[prop].email === email;
   }
 }
-
-app.get("/u/:shortId", (req, res) => {
-  let longURL = urlDatabase[req.params.shortId];
-  if (longURL === undefined) {
-    res.sendStatus(404);
-    return;
-  }
-  res.redirect(longURL);
-});
 
 app.get("/register", (req, res) => {
   res.render("register");
@@ -106,7 +106,7 @@ app.post("/login", (req, res) => {
 
   res.cookie("user_id", user.id);
 
-  res.redirect("/");
+  res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
@@ -115,23 +115,12 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
-app.post("/urls/:id/update", (req, res) => {
-  var shortId = req.params.id;
-
-  console.log(shortId);
-  console.log(req.body.longUrl);
-  //update db
-  urlDatabase[shortId] = req.body.longUrl;
-
-  res.redirect(`/urls/${shortId}`);
+app.get("/", (req, res) => {
+  res.redirect("/urls");
 });
 
-app.post("/urls/:id/delete", (req, res) => {
-  var shortURL = req.params.id;
-  // var longURL = urlDatabase[shortURL];
-  // var combined = `${shortURL + longURL}`;
-  delete urlDatabase[shortURL];
-  res.redirect("/urls");
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
 });
 
 app.get("/urls", (req, res) => {
@@ -148,15 +137,31 @@ app.get("/urls/new", (req, res) => {
   var templateVars = {
     user: users[req.cookies["user_id"]]
   };
+  if (!users[req.cookies["user_id"]]) {
+    res.redirect("/urls");
+    return;
+  }
   res.render("urls_new", templateVars);
+});
+
+app.post("/urls", (req, res) => {
+  console.log(shortId.generate());
+  console.log(req.body.longURL);
+  var newId = shortId.generate();
+  var objectUrl = req.body.longURL;
+  // debug statement to see POST parameters
+  urlDatabase[newId].longUrl = objectUrl;
+  console.log(urlDatabase);
+  res.redirect(`/urls/${newId}`);
 });
 
 app.get("/urls/:id", (req, res) => {
   var shortURL = req.params.id;
-  var longURL = urlDatabase[shortURL];
+  //need to change
+  var objectUrl = urlDatabase[shortURL].longUrl;
   var templateVars = {
     shortUrl: shortURL,
-    longUrl: longURL,
+    longUrl: objectUrl,
     user: users[req.cookies["user_id"]]
   };
   console.log("Logged in page");
@@ -164,27 +169,45 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.get("/", (req, res) => {
-  res.end("Hello!");
-});
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-app.get("/hello", (req, res) => {
-  res.end("<html><body>Hello <b>World</b></body></html>\n");
+app.post("/urls/:id/update", (req, res) => {
+  var shortId = req.params.id;
+
+  console.log(shortId);
+  console.log(req.body.longUrl);
+  console.log("cookies", req.cookies);
+  let curUserID = req.cookies.user_id;
+  if (!(urlDatabase[shortId]["userId"] === curUserID)) {
+    res.send("<h1>wrong </h1>");
+    return;
+  }
+  urlDatabase[shortId]["longUrl"] = req.body.longUrl;
+
+  res.redirect(`/urls/${shortId}`);
 });
 
-app.post("/urls", (req, res) => {
-  console.log(shortId.generate());
-  console.log(req.body.longURL);
-  var newId = shortId.generate();
-  var longUrl = req.body.longURL;
-  // debug statement to see POST parameters
-  urlDatabase[newId] = longUrl;
-  console.log(urlDatabase);
-  res.redirect(`/urls/${newId}`);
+app.post("/urls/:id/delete", (req, res) => {
+  var shortId = req.params.id;
+  let curUserID = req.cookies.user_id;
+  if (!(urlDatabase[shortId]["userId"] === curUserID)) {
+    // res.sendStatus(403);
+    res.send("<h1>You can not delete what isn't yours </h1>");
+    return;
+  }
+  delete urlDatabase[shortId];
+  res.redirect("/urls");
 });
 
+// point of project.
+app.get("/u/:shortId", (req, res) => {
+  let urlObject = urlDatabase[req.params.shortId];
+  if (urlObject === undefined) {
+    res.sendStatus(404);
+    return;
+  }
+  res.redirect(urlObject["longUrl"]);
+});
+
+// opens local port
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
