@@ -6,7 +6,6 @@
 <body>
 <div> <%- include partials/_header.ejs %> </div>
 <%= shortUrl %>
-<a href=
 <form method="POST" action="/urls/<%= shortUrl%>/update">
   <input name="longUrl" type="text" value= "<%=longUrl%>">
   <button type="submit"> EDIT </button>
