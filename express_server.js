@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const shortId = require("shortid");
 const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
+const bcrypt = require("bcrypt");
 
 app.use(morgan("tiny"));
 
@@ -49,8 +50,19 @@ var users = {
 
 function is_duplicate_email(email) {
   for (var prop in users) {
+    console.log("checking email for", prop);
     return users[prop].email === email;
   }
+}
+
+function urlsForUser(user_id) {
+  var answer = {};
+  for (var shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userId === user_id) {
+      answer[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return answer;
 }
 
 app.get("/register", (req, res) => {
@@ -60,7 +72,8 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   var newId = shortId.generate();
   var email = req.body["email"];
-  var password = req.body["password"];
+  var password = bcrypt.hashSync(req.body["password"], 10);
+
   users[newId] = {
     id: newId,
     email: email,
@@ -99,7 +112,7 @@ app.post("/login", (req, res) => {
     res.sendStatus(403);
     return;
   }
-  if (user.password !== password) {
+  if (!bcrypt.compareSync(password, user.password)) {
     res.sendStatus(403);
     return;
   }
@@ -124,34 +137,33 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  // looping over userUrls in order to just display the users urls on the /urls page.
+  var userUrls = urlsForUser(req.cookies["user_id"]);
   let templateVars = {
-    urls: urlDatabase,
+    urls: userUrls,
     user: users[req.cookies["user_id"]]
   };
-  console.log("Base page");
-  console.log(templateVars);
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   var templateVars = {
-    user: users[req.cookies["user_id"]]
+    user: users[req.cookies.user_id]
   };
-  if (!users[req.cookies["user_id"]]) {
-    res.redirect("/urls");
+  if (!users[req.cookies.user_id]) {
+    res.redirect("/login");
     return;
   }
   res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => {
-  console.log(shortId.generate());
-  console.log(req.body.longURL);
   var newId = shortId.generate();
   var objectUrl = req.body.longURL;
-  // debug statement to see POST parameters
-  urlDatabase[newId].longUrl = objectUrl;
-  console.log(urlDatabase);
+  urlDatabase[newId] = {
+    longUrl: objectUrl,
+    userId: req.cookies.user_id
+  };
   res.redirect(`/urls/${newId}`);
 });
 
