@@ -1,20 +1,21 @@
-<p> This is the included _header </p>
 <% if (user) { %>
-
+  <%= user.email %>
   <form method="POST" action="/logout"/>
     <input type="submit" value="logout"/>
   </form>
 
-<% } else { %> <%}%>
+
+<% } else { %>
 
 <p>
-  <a href=http://localhost:8080/register>
+  <a href="/register">
     <font color=#cc3300> Press on the link to register </font>
   </a>
 <p>
-  <a href=http://localhost:8080/login>
+  <a href="/login">
   <font color=#cc3300> Press on the link to login </font>
   </a>
 <p>
+  <%}%>
 
 
