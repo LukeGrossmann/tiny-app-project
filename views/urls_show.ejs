@@ -5,10 +5,21 @@
 </head>
 <body>
 <div> <%- include partials/_header.ejs %> </div>
+<% if (!user) {%>
+<p> Must login to see URL </p>
+<%} else if (!longUrl) {%>
+  <p> Url does not exist! </p>
+<%}  else if (owned) {%>
 <%= shortUrl %>
+<p> Times visited: <%= visits %></p>
+<p> Date created: <%= date %> </p>
 <form method="POST" action="/urls/<%= shortUrl%>/update">
   <input name="longUrl" type="text" value= "<%=longUrl%>">
   <button type="submit"> EDIT </button>
 </form>
+<%} else {%>
+<p> URL does not belong to <%= user.id%> </p>
+<%}%>
+
 </body>
 </html>
