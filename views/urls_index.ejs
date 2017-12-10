@@ -5,6 +5,8 @@
 </head>
 <body>
   <div> <%- include partials/_header.ejs %> </div>
+  <% if(user) { %>
+  <a href="/urls/new"> Make a new short url </a>
   <ul>
     <% for (var i in urls) { %>
       <li>
@@ -12,8 +14,14 @@
         <form method="POST" action="/urls/<%=i%>/delete">
           <button> DELETE </button>
         </form>
+        <form method="GET" action="/urls/<%=i%>">
+          <button> EDIT </button>
+        </form>
       </li>
     <% } %>
   </ul>
+ <% } else {%>
+ <p>Must login to view this </p>
+ <%}%>
 </body>
 </html>
