@@ -11,11 +11,14 @@
   <p> Url does not exist! </p>
 <%}  else if (owned) {%>
 <%= shortUrl %>
+<p>
+  <a href="/u/<%=shortUrl%>">PRESS HERE TO USE NEW SHORT ID </a>
 <p> Times visited: <%= visits %></p>
 <p> Date created: <%= date %> </p>
 <form method="POST" action="/urls/<%= shortUrl%>/update">
   <input name="longUrl" type="text" value= "<%=longUrl%>">
   <button type="submit"> EDIT </button>
+  <a href="/urls">PRESS HERE TO CHECK OUT YOUR NEW URLS</a>
 </form>
 <%} else {%>
 <p> URL does not belong to <%= user.id%> </p>
