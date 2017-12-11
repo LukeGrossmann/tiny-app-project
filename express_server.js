@@ -1,3 +1,4 @@
+//all my npm packages
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 8080; // default port 8080
@@ -6,19 +7,20 @@ const shortId = require("shortid");
 const morgan = require("morgan");
 const bcrypt = require("bcrypt");
 const cookieSession = require("cookie-session");
-
+//my debugger
 app.use(morgan("tiny"));
 
 app.use(bodyParser.urlencoded({ extended: true }));
+//cookieSession is my cookie encrypter
 app.use(
   cookieSession({
     name: "session",
     keys: ["verysecretkey"]
   })
 );
-
+//Express Templates
 app.set("view engine", "ejs");
-
+//my pre-set URL database for each user
 var urlDatabase = {
   b2xVn2: {
     longUrl: "http://www.lighthouselabs.ca",
@@ -33,7 +35,7 @@ var urlDatabase = {
     visits: 100
   }
 };
-
+//my pre-set database where I push in new users and keep hashed passwords
 var users = {
   titan: {
     id: "titan",
@@ -56,7 +58,7 @@ var users = {
     password: "dishwasher-funk"
   }
 };
-
+//my funciton for checking duplicate emails
 function is_duplicate_email(email) {
   console.log(email);
   var contains = false;
@@ -82,11 +84,11 @@ function urlsForUser(user_id) {
   }
   return answer;
 }
-
+//rendering my register page
 app.get("/register", (req, res) => {
   res.render("register");
 });
-
+//posting to my register page and redirecting to the home page
 app.post("/register", (req, res) => {
   var newId = shortId.generate();
   var email = req.body["email"];
@@ -111,14 +113,12 @@ app.post("/register", (req, res) => {
 
   res.redirect("/urls");
 });
-
+//rendering my login page
 app.get("/login", (req, res) => {
   res.render("login");
 });
+//posting login and then redirecting back to home page
 app.post("/login", (req, res) => {
-  // const username = req.body.username;
-  // res.cookie("user_id", users[username]);
-
   var email = req.body["email"];
   var password = req.body["password"];
   var user;
@@ -141,13 +141,13 @@ app.post("/login", (req, res) => {
 
   res.redirect("/urls");
 });
-
+//posting form to logout page ans redirecting back to home page
 app.post("/logout", (req, res) => {
   // const { username } = req.body;
   req.session.user_id = null;
   res.redirect("/urls");
 });
-
+//checking for user at root page, if user, going back to home page, if not, redirect to login
 app.get("/", (req, res) => {
   if (req.session.user_id) {
     res.redirect("/urls");
@@ -155,11 +155,11 @@ app.get("/", (req, res) => {
     res.redirect("/login");
   }
 });
-
+//getting my Json database
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
-
+//rendering home page
 app.get("/urls", (req, res) => {
   // looping over userUrls in order to just display the users urls on the /urls page.
   var userUrls = urlsForUser(req.session.user_id);
@@ -169,7 +169,7 @@ app.get("/urls", (req, res) => {
   };
   res.render("urls_index", templateVars);
 });
-
+//rendering page for when you create new urls
 app.get("/urls/new", (req, res) => {
   if (!req.session.user_id) {
     res.redirect("/login");
@@ -195,7 +195,7 @@ app.post("/urls", (req, res) => {
   };
   res.redirect(`/urls/${newId}`);
 });
-
+//rendering page an redirecting to urls_show
 app.get("/urls/:id", (req, res) => {
   var shortURL = req.params.id;
   //need to change
@@ -204,14 +204,6 @@ app.get("/urls/:id", (req, res) => {
     objectUrl = urlDatabase[shortURL].longUrl;
     urlDatabase[shortURL].visits++;
   }
-  //   shortURL in urlDatabase ? urlDatabase[shortURL].longUrl : undefined;
-  // }
-
-  // var a = condition ? true case : false case
-  // a = true ? "it is true" : "it is false";
-  // a === true
-  // a = false ? "it is true" : "it is false";
-  // a === false
 
   var templateVars = {
     shortUrl: shortURL,
@@ -239,7 +231,7 @@ app.post("/urls/:id/update", (req, res) => {
 
   res.redirect(`/urls/${shortId}`);
 });
-
+//deleteing any new short urls if there is a user
 app.post("/urls/:id/delete", (req, res) => {
   var shortId = req.params.id;
   let curUserID = req.session.user_id;
@@ -266,16 +258,3 @@ app.get("/u/:shortId", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-// this was the function I was going to use instead of downloading shortID module!!!!!
-
-// function generateRandomString(string) {
-//   let possible = "1234567890";
-//   for (var i = 0; i < 26; i++) {
-//     possible += String.fromCharCode(65 + i) + String.fromCharCode(97 + i);
-//   }
-
-//   console.log(possible);
-// }
-
-// generateRandomString();
